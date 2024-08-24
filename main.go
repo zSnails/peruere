@@ -2,23 +2,36 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
 	"unsafe"
 
 	"github.com/gen2brain/go-mpv"
 	"github.com/zSnails/peruere/xlib"
 )
 
-var videoFile string
+var (
+	videoFile string
+	width     uint
+	height    uint
+	xOffset   int
+	yOffset   int
+)
 
 func init() {
 	flag.StringVar(&videoFile, "file", "video.mp4", "the file to play as a wallpaper")
+	flag.UintVar(&height, "height", 1080, "the height of the window")
+	flag.UintVar(&width, "width", 1920, "the width of the window")
+	flag.IntVar(&xOffset, "x-offset", 0, "the x axis offset")
+	flag.IntVar(&yOffset, "y-offset", 0, "the y axis offset")
 	flag.Parse()
 }
 
 func main() {
-
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 	attrs := xlib.SetWindowAttributes{
 		BackgroundPixmap: xlib.ParentRelative,
 		BackingStore:     xlib.Always,
@@ -29,8 +42,7 @@ func main() {
 	defer xlib.XCloseDisplay(display)
 
 	root := xlib.XDefaultRootWindow(display)
-	window := xlib.XCreateWindow(display, root, 0, 0, 1920, 1080, 0, 0, xlib.InputOutput, nil, xlib.CWOverrideRedirect|xlib.CWBackingStore, &attrs)
-	fmt.Printf("window: %v\n", window)
+	window := xlib.XCreateWindow(display, root, xOffset, yOffset, width, height, 0, 0, xlib.InputOutput, nil, xlib.CWOverrideRedirect|xlib.CWBackingStore, &attrs)
 	defer xlib.XDestroyWindow(display, window)
 
 	{
