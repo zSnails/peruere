@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"unsafe"
@@ -8,6 +9,13 @@ import (
 	"github.com/gen2brain/go-mpv"
 	"github.com/zSnails/peruere/xlib"
 )
+
+var videoFile string
+
+func init() {
+	flag.StringVar(&videoFile, "file", "video.mp4", "the file to play as a wallpaper")
+	flag.Parse()
+}
 
 func main() {
 
@@ -98,7 +106,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := m.Command([]string{"loadfile", "/home/ayaka/Genshin Impact - Shenhe [ Live Wallpaper ] [rOEyER6lXWo].webm"}); err != nil {
+	if err := m.Command([]string{"loadfile", videoFile}); err != nil {
 		panic(err)
 	}
 
