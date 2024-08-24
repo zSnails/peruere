@@ -62,6 +62,10 @@ type WMHints struct {
 	WindowGroup  uint64
 }
 
+type ClassHint struct {
+	ResName, ResClass string
+}
+
 func XInternAtom(display *Display, atom string, state int) Atom {
 	displayC := (*C.Display)(display)
 	atomC := C.CString(atom)
@@ -70,6 +74,20 @@ func XInternAtom(display *Display, atom string, state int) Atom {
 	_atom := C.XInternAtom(displayC, atomC, stateC)
 	return Atom(_atom)
 
+}
+
+func makeClassHint(hint *ClassHint) *XClassHint {
+	return &XClassHint{
+		res_name:  C.CString(hint.ResName),
+		res_class: C.CString(hint.ResClass),
+	}
+}
+
+func XSetClassHint(display *Display, window Window, classHint *ClassHint) {
+	displayC := (*C.Display)(display)
+	windowC := (C.Window)(window)
+	ch := (*C.XClassHint)(makeClassHint(classHint))
+	C.XSetClassHint(displayC, windowC, ch)
 }
 
 func stringSliceToCArray(strs []string) **C.char {
