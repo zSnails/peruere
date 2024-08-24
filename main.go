@@ -43,7 +43,17 @@ func main() {
 
 	root := xlib.XDefaultRootWindow(display)
 	window := xlib.XCreateWindow(display, root, xOffset, yOffset, width, height, 0, 0, xlib.InputOutput, nil, xlib.CWOverrideRedirect|xlib.CWBackingStore, &attrs)
+	fmt.Printf("window: %v\n", window)
 	defer xlib.XDestroyWindow(display, window)
+
+    xlib.XSetClassHint(
+    	display,
+    	window,
+    	&xlib.ClassHint{
+    		ResName:  "peruere",
+    		ResClass: "peruere",
+    	},
+    )
 
 	{
 		prop := xlib.XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", xlib.False)
