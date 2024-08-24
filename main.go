@@ -85,6 +85,7 @@ func main() {
 	xlib.XLowerWindow(display, window)
 
 	m := mpv.New()
+	defer m.TerminateDestroy()
 
 	if err := m.SetProperty("wid", mpv.FormatInt64, int(window)); err != nil {
 		panic(err)
