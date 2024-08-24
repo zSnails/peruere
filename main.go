@@ -110,16 +110,11 @@ func main() {
 		panic(err)
 	}
 
-	xlib.XMapWindow(display, window)
 	xlib.XStoreName(display, window, "peruere")
+	xlib.XMapWindow(display, window)
 	xlib.XFlush(display)
 
-loop:
-	for {
-		event := m.WaitEvent(10000)
-		switch event.EventID {
-		case mpv.EventShutdown:
-			break loop
-		}
-	}
+	sig := make(chan os.Signal, 0)
+	signal.Notify(sig, os.Kill, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
+	<-sig
 }
