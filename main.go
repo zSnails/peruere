@@ -127,7 +127,7 @@ func main() {
 	xlib.XMapWindow(display, window)
 	xlib.XFlush(display)
 
-	sig := make(chan os.Signal, 0)
-	signal.Notify(sig, os.Kill, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGINT)
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
 	<-sig
 }
