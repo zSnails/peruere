@@ -9,23 +9,22 @@ import (
 	"unsafe"
 
 	"github.com/gen2brain/go-mpv"
+	"github.com/zSnails/peruere/geometry"
 	"github.com/zSnails/peruere/xlib"
 )
 
 var (
 	videoFile string
-	width     uint
-	height    uint
-	xOffset   int
-	yOffset   int
+	geom      string
 )
 
 func init() {
 	flag.StringVar(&videoFile, "file", "video.mp4", "the file to play as a wallpaper")
-	flag.UintVar(&height, "height", 1080, "the height of the window")
-	flag.UintVar(&width, "width", 1920, "the width of the window")
-	flag.IntVar(&xOffset, "x-offset", 0, "the x axis offset")
-	flag.IntVar(&yOffset, "y-offset", 0, "the y axis offset")
+	flag.StringVar(&geom, "geometry", "1920x1080+0+0", "the geometry for the background window")
+	// flag.UintVar(&height, "height", 1080, "the height of the window")
+	// flag.UintVar(&width, "width", 1920, "the width of the window")
+	// flag.IntVar(&xOffset, "x-offset", 0, "the x axis offset")
+	// flag.IntVar(&yOffset, "y-offset", 0, "the y axis offset")
 	flag.Parse()
 }
 
@@ -42,6 +41,10 @@ func main() {
 	defer xlib.XCloseDisplay(display)
 
 	root := xlib.XDefaultRootWindow(display)
+	width, height, xOffset, yOffset, err := geometry.ParseGeometry(geom)
+	if err != nil {
+		panic(err)
+	}
 	window := xlib.XCreateWindow(display, root, xOffset, yOffset, width, height, 0, 0, xlib.InputOutput, nil, xlib.CWOverrideRedirect|xlib.CWBackingStore, &attrs)
 	defer xlib.XDestroyWindow(display, window)
 
