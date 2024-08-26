@@ -5,5 +5,5 @@ Play animated backgrounds on linux (X11)
 # Usage
 
 ```bash
-peruere [-file <media>] [-width <int>] [-height <int>] [-x-offset <int>] [-y-offset <int>]
+peruere -file <media> [-geometry <0000x0000+0+0>]
 ```
