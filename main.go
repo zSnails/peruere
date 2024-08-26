@@ -53,53 +53,41 @@ func main() {
 		},
 	)
 
-	{
-		prop := xlib.XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", xlib.False)
-		xa := xlib.XInternAtom(display, "_NET_WM_WINDOW_TYPE", xlib.False)
-		xlib.XChangeProperty(display, window, xa, xlib.XA_ATOM, 32, xlib.PropModeReplace, unsafe.Pointer(&prop), 1)
+	windowTypeDesktop := xlib.XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", xlib.False)
+	windowType := xlib.XInternAtom(display, "_NET_WM_WINDOW_TYPE", xlib.False)
+	xlib.XChangeProperty(display, window, windowType, xlib.XA_ATOM, 32, xlib.PropModeReplace, unsafe.Pointer(&windowTypeDesktop), 1)
+
+	motifWmHints := xlib.XInternAtom(display, "_MOTIF_WM_HINTS", xlib.False)
+	if motifWmHints != xlib.None {
+		prop := [5]int64{2, 0, 0, 0, 0}
+		xlib.XChangeProperty(display, window, motifWmHints, motifWmHints, 32, xlib.PropModeReplace, unsafe.Pointer(&prop), 5)
 	}
 
-	{
-		xa := xlib.XInternAtom(display, "_MOTIF_WM_HINTS", xlib.False)
-		if xa != xlib.None {
-			prop := [5]int64{2, 0, 0, 0, 0}
-			xlib.XChangeProperty(display, window, xa, xa, 32, xlib.PropModeReplace, unsafe.Pointer(&prop), 5)
-		}
+	winLayer := xlib.XInternAtom(display, "_WIN_LAYER", xlib.False)
+	if winLayer != xlib.None {
+		layerZero := int64(0)
+		xlib.XChangeProperty(display, window, winLayer, xlib.XA_CARDINAL, 32, xlib.PropModeAppend, unsafe.Pointer(&layerZero), 1)
 	}
 
-	{
-		xa := xlib.XInternAtom(display, "_WIN_LAYER", xlib.False)
-		if xa != xlib.None {
-			prop := int64(0)
-			xlib.XChangeProperty(display, window, xa, xlib.XA_CARDINAL, 32, xlib.PropModeAppend, unsafe.Pointer(&prop), 1)
-		}
-
-		xa = xlib.XInternAtom(display, "_NET_WM_STATE", xlib.False)
-		if xa != xlib.None {
-			xa_prop := xlib.XInternAtom(display, "_NET_WM_STATE_BELOW", xlib.False)
-			xlib.XChangeProperty(display, window, xa, xlib.XA_ATOM, 32, xlib.PropModeAppend, unsafe.Pointer(&xa_prop), 1)
-		}
+	wmState := xlib.XInternAtom(display, "_NET_WM_STATE", xlib.False)
+	if wmState != xlib.None {
+		stateBelow := xlib.XInternAtom(display, "_NET_WM_STATE_BELOW", xlib.False)
+		xlib.XChangeProperty(display, window, wmState, xlib.XA_ATOM, 32, xlib.PropModeAppend, unsafe.Pointer(&stateBelow), 1)
 	}
 
-	{
-		hints := xlib.WMHints{
-			Input: xlib.False,
-		}
-		xlib.XSetWMProperties(display, window, nil, nil, os.Args, len(os.Args), nil, &hints, nil)
+	hints := xlib.WMHints{
+		Input: xlib.False,
 	}
+	xlib.XSetWMProperties(display, window, nil, nil, os.Args, len(os.Args), nil, &hints, nil)
 
-	{
-		xa := xlib.XInternAtom(display, "_NET_WM_DESKTOP", xlib.False)
-		xa_xprop := xlib.XInternAtom(display, "_NET_WM_STATE_STICKY", xlib.False)
-		xlib.XChangeProperty(display, window, xa, xlib.XA_CARDINAL, 32, xlib.PropModeAppend, unsafe.Pointer(&xa_xprop), 1)
-	}
+	wmDesktop := xlib.XInternAtom(display, "_NET_WM_DESKTOP", xlib.False)
+	stateSticky := xlib.XInternAtom(display, "_NET_WM_STATE_STICKY", xlib.False)
+	xlib.XChangeProperty(display, window, wmDesktop, xlib.XA_CARDINAL, 32, xlib.PropModeAppend, unsafe.Pointer(&stateSticky), 1)
 
-	{
-		region := xlib.XCreateRegion()
-		if region != nil {
-			xlib.XShapeCombineRegion(display, window, xlib.ShapeInput, 0, 0, region, xlib.ShapeSet)
-			xlib.XDestroyRegion(region)
-		}
+	region := xlib.XCreateRegion()
+	if region != nil {
+		xlib.XShapeCombineRegion(display, window, xlib.ShapeInput, 0, 0, region, xlib.ShapeSet)
+		xlib.XDestroyRegion(region)
 	}
 
 	xlib.XLowerWindow(display, window)
