@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -39,7 +40,7 @@ func main() {
 	root := xlib.XDefaultRootWindow(display)
 	width, height, xOffset, yOffset, err := geometry.ParseGeometry(geom)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	window := xlib.XCreateWindow(display, root, xOffset, yOffset, width, height, 0, 0, xlib.InputOutput, nil, xlib.CWOverrideRedirect|xlib.CWBackingStore, &attrs)
 	defer xlib.XDestroyWindow(display, window)
@@ -96,28 +97,39 @@ func main() {
 	defer m.TerminateDestroy()
 
 	if err := m.SetProperty("wid", mpv.FormatInt64, int(window)); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	if err := m.SetPropertyString("loop", "yes"); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	if err := m.SetPropertyString("x11-bypass-compositor", "yes"); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	if err := m.SetPropertyString("vo", "gpu"); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	if err := m.Initialize(); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
+	err = m.RequestLogMessages("trace")
 	if err := m.Command([]string{"loadfile", videoFile}); err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
+
+	go func() {
+		for {
+			event := m.WaitEvent(10000)
+			switch event.EventID {
+			case mpv.EventLogMsg:
+				log.Printf("%v\n", event.LogMessage())
+			}
+		}
+	}()
 
 	xlib.XStoreName(display, window, "peruere")
 	xlib.XMapWindow(display, window)
